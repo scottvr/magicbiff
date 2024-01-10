@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible">
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'"
+/>
+<meta
+  http-equiv="X-Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'"
+/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<meta name="author" content="scottvr"/> 
+<meta name="description" content="Hi-res image-to-text generataor, bitmap to ASCII art converter"> 
+<meta name="keywords" content="image to ascii, ascii art, image to text online, img2txt, hi-res img2txt"/> 
+  <title>hi-res img2txt</title>
+  <style>body{color:#555;background-color:#ececff;font-family:"Andale Mono","Consolas","Lucida Console","Courier","Courier New",monospace;font-size:4px;line-height:2px}.bigger{font-size:16px;line-height:17px;white-space:pre}</style>
+</head>
+<body>
+<div class="bigger">
+Image-to-ASCII generators are certainly not a new idea, but I found all of the online converter sites output some <a href="/img2txt/ascii-art.html">pretty ugly results.</a><br/>
+Turns out we can generate pretty great-looking plain ascii (no Unicode) art with just a little CSS tweaking and a completely unscientific RGB to character mapping. It works. <br/>
+</div>
+<div class="bigger">
+<a href="https://www.killsignal.net/img2txt/cimg.html">Try it in color!</a>
+</div>
+<div class="bigger">
+<b>
+Upload any type of image file of any reasonable<b>**</b> size.<br/>
+ - The file is "uploaded" only in your browser via javascript; your image is not transferred over the network.<br/>
+ - zooming with ctrl-+ and pinch/stretch on a trackpad scale the image differently; try both ways.</b><br/>
+<strike> - Sorry, but it doesn't work on mobile devices and I haven't bothered to learn why so I can correct it.</strike> (it's still a little glitchy on mobile, but it does work now.)<br/>
+<b><i> **reasonable is whatever you deem it to be; it's your computer</i></b>
+</div>
+<br>
+<div class="bigger">
+<p>
+  <input type="file" id="fileInput">
+</p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+</body>
+<script src="./renderer.js"></script>
+</html>
+
