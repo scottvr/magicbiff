@@ -1,28 +1,26 @@
 
 <!DOCTYPE html>
-<html lang="en"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible">
-<meta
-  http-equiv="Content-Security-Policy"
-  content="default-src 'self'; script-src 'self'"
-/>
-<meta
-  http-equiv="X-Content-Security-Policy"
-  content="default-src 'self'; script-src 'self'"
-/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<meta name="author" content="scottvr"/> 
-<meta name="description" content="Hi-res image-to-text generataor, bitmap to ASCII art converter"> 
-<meta name="keywords" content="image to ascii, ascii art, image to text online, img2txt, hi-res img2txt"/> 
-  <title>hi-res img2txt</title>
-  <style>body{color:#555;background-color:#ececff;font-family:"Andale Mono","Consolas","Lucida Console","Courier","Courier New",monospace;font-size:4px;line-height:2px}.bigger{font-size:16px;line-height:17px;white-space:pre}</style>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="scottvr@gmail.com"/>
+    <meta name="description" content="Hi-res image-to-text generator, bitmap to ASCII art converter">
+    <meta name="keywords" content="image to ascii, ascii art, image to text online, img2txt, hi-res img2txt">
+    <title>hi-res img2txt</title>
+    <style>body{margin:0;padding:0;color:#555;background-color:#ececff;font-family:"Andale Mono","Consolas","Lucida Console","Courier","Courier New",monospace;font-size:5px;line-height:5px;letter-spacing:1px}.bigger{font-size:15px;letter-spacing:0;line-height:17px;white-space:pre}</style>
 </head>
+
 <body>
+    <blockquote id="ascii">
 <div class="bigger">
 Image-to-ASCII generators are certainly not a new idea, but I found all of the online converter sites output some <a href="/img2txt/ascii-art.html">pretty ugly results.</a><br/>
 Turns out we can generate pretty great-looking plain ascii (no Unicode) art with just a little CSS tweaking and a completely unscientific RGB to character mapping. It works. <br/>
 </div>
 <div class="bigger">
-<a href="https://www.killsignal.net/img2txt/cimg.html">Try it in color!</a>
+<a href="https://www.killsignal.net/img2txt/">Try the original higher-res b&w version </a>
 </div>
 <div class="bigger">
 <b>
@@ -30,18 +28,144 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
  - The file is "uploaded" only in your browser via javascript; your image is not transferred over the network.<br/>
  - zooming with ctrl-+ and pinch/stretch on a trackpad scale the image differently; try both ways.</b><br/>
 <strike> - Sorry, but it doesn't work on mobile devices and I haven't bothered to learn why so I can correct it.</strike> (it's still a little glitchy on mobile, but it does work now.)<br/>
-<b><i> **reasonable is whatever you deem it to be; it's your computer</i></b>
+<b><i> **reasonable is whatever you deem it to be; it's your computer<br>
+ &nbsp; note that this color version will reduce the resolution of your image as needed to prevent your browser from crashing.
 </div>
-<br>
-<div class="bigger">
-<p>
-  <input type="file" id="fileInput">
-</p>
-</div>
+    </blockquote>
+    <br>
+    <div class="bigger">
+        <p>
+            <input type="file" id="fileInput">
+        </p>
+    </div>
 
-<canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
+    <script>
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d', { preserveDrawingBuffer: true });
+
+      const fileInput = document.getElementById('fileInput');
+
+      fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        const size = 300;
+        const scale = window.devicePixelRatio;
+        reader.addEventListener('load', (e) => {
+          var img = new Image();
+          var rszimg = new Image();
+          rszimg.addEventListener('load', () => { img.src = resize(size, size); });
+          rszimg.src = reader.result;
+          console.log(rszimg.width, rszimg.height);
+          img.addEventListener('load', (e) => {
+            ctx.drawImage(img, 0, 0, 300, 200 / img.width * 200);
+            var imgWidth = img.width;
+            var imgHeight = img.height;
+            var newWidth, newHeight, offsetX, offsetY;
+            var scaleRat = Math.min(imgWidth, imgHeight)/Math.max(imgWidth,imgHeight);
+            newWidth = imgWidth > imgHeight ? size : imgWidth*scaleRat;
+            newHeight = imgHeight > imgWidth ? size : imgHeight*scaleRat;
+            //const chars = '@B%8&WM#oahkbdpqwcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.,....    '.split("")
+            const chars = '@B%8&WM#*oahkbdpqwmO0CJUYzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.'.split("");
+            var count = 0;
+            var str =  "<blockquote id='ascii'><pre><div class=\"bigger\"><p><a href=\"/img2txt/cimg.html\">Again</a></p></div>";
+            var ar = getarrayfromcanvas(canvas);
+            var sum = 0;
+            var R, G, B, color;
+            function tohex(num) {
+              var str = Number(num).toString(16);
+              return str.length == 1 ? "0" + str : str;
+            };
+            for(var ycnt=0;ycnt<canvas.height;ycnt++) {
+              for(var xcnt=0;xcnt<canvas.width;xcnt++) {
+                count++;
+      
+                R = ar[xcnt][ycnt][0];
+                G = ar[xcnt][ycnt][1];
+                B = ar[xcnt][ycnt][2];
+                color = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+      
+                R = Math.max(ar[xcnt][ycnt][0] >> 1, 0);
+                G = Math.max(ar[xcnt][ycnt][1] >> 1, 0);
+                B = Math.max(ar[xcnt][ycnt][2] >> 1, 0);
+                shadow = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+                //console.log(R.toString());
+                R = Math.max(R <= 215 ? R + 40 : 255, 0);
+                G = Math.max(G <= 215 ? G + 40 : 255, 0);
+                B = Math.max(B <= 215 ? B + 40 : 255, 0);
+                bgcolor = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+                //console.log(R.toString());
+                sum = ar[xcnt][ycnt][0]+ar[xcnt][ycnt][1]+ar[xcnt][ycnt][2];
+                i = parseInt(((sum/12) % chars.length))
+                ch=chars[i]
+        
+                if(ch == ' ') {
+                  ch = '&nbsp;';
+                }
+                if(ch == '<') {
+                  ch = '&lt;'     
+                }
+                if(ch == '<') {
+                  ch = '&gt;'     
+                }
+                str+='<span style="color: ' + color + '; background-color: ' + bgcolor + '; text-shadow: 1px 1px ' + shadow + ';">' + ch + "</span>";
+              }
+              str+="\n";
+            }
+            str+='<br/><div id="ii" class="bigger" style="text-align: center; width: calc(2px * ' + size + ');"><b>zooming with ctrl-+ and pinch/stretch on a trackpad (or screen) scale the image differently; try both ways.</b></span></div><br/></pre></blockquote> <script src="javascript:snap();" ></sc' + 'ript>';
+            document.body.innerHTML=str + "</body>";
+          });
+                
+          function getarrayfromcanvas(canvas) {
+            context = canvas.getContext('2d');
+            var imgd = context.getImageData(0,0,canvas.width,canvas.height);
+            var arr = [];
+            var idx;
+            for(var xcnt=0;xcnt<canvas.width;xcnt++){
+              arr[xcnt]=[];
+              for(var ycnt=0;ycnt<canvas.height;ycnt++){
+                arr[xcnt][ycnt]=[];
+                for(var ccnt=0;ccnt<4;ccnt++){
+                  idx=(ycnt * canvas.width + xcnt) * 4 + ccnt;
+                  arr[xcnt][ycnt][ccnt]=imgd.data[idx];
+              } 
+            } 
+          }
+          return arr;
+        }
+
+        function resize(maxwhw, maxwhh) {
+          let maxw = maxwhw;
+          let maxh = maxwhh;
+          let w = maxw;
+          let h = maxh;
+          let needs_reeize = false;
+          console.log(w,h,maxw,maxh);
+          if(w >= h && w >= maxw) {
+            h *= maxw/w;
+            w = maxw;
+          } else if(h > maxh) {
+              w = maxh/h;
+              h = maxh;
+          } 
+          let rszcan = document.createElement('canvas');
+          rszcan.width = w
+          rszcan.height = h;
+      
+          let rszctx = rszcan.getContext('2d');
+          console.log(rszimg, 0, 0, w, h);
+          rszctx.drawImage(rszimg, 0, 0, w, h);
+          return rszcan.toDataURL('image/png');
+        }  
+      });
+      reader.readAsDataURL(file);
+    });
+    </script>
 </body>
-<script type="text/javasript" src="./renderer.js"></script>
+              
 </html>
 
