@@ -25,6 +25,14 @@
   padding: 10px;
   width: 20em;
 }
+	.pream {
+		flex: 80%;
+			font-size: 15px;
+            line-height: 17px;
+            white-space: pre;
+
+			
+	}
 
         .bigger {
 		width: fit-content;
@@ -37,11 +45,12 @@
 </head>
 
 <body>
-    <blockquote id="ascii">
-<div class="bigger">
-Image-to-ASCII generators are certainly not a new idea, but I found all of the online converter sites output some <a href="/img2txt/ascii-art.html">pretty ugly results.</a><br/>
-Turns out we can generate pretty great-looking plain ascii (no Unicode) art with just a little CSS tweaking and a completely unscientific RGB to character mapping. It works. <br/>
+<div class="pream">
+Image-to-ASCII generators are certainly not a new idea, so why another? Basically I found all of the online converter sites output some <a href="/img2txt/ascii-art.html">pretty ugly results</a> (and in  most cases, processed your image on a remote server) while the tools I saw that are capable of nice-looking results require local installation of varying extents. Plus a few other minor quibbles. <br/>
+PLaying around with the problem, I found as it turns out we can generate pretty great-looking plain ascii (no Unicode) art completely in the local browser instance with a completely unscientific RGB to character mapping, and then further if the browser is to be the ultimate display for our output, with some pretty-arbitrary choices in CSS tweaking, we get some amazing color results.<BR>
+Quick and dirty as it is, it definitely works, with results better than I expected to achieve. <br/>
 </div>
+    <blockquote id="ascii">
 <div class="bigger">
 Introducing <a href="https://github.com/scottvr/magicbiff">MAGICBIFF - Multi-color Ascii GraphICs from Binary Image File Formats</a></div>
 <div>
