@@ -20,8 +20,14 @@
             line-height: 5px;
             letter-spacing: 1px;
         }
+	.container {
+  border: 2px solid #ccc;
+  padding: 10px;
+  width: 20em;
+}
 
         .bigger {
+		width: fit-content;
             font-size: 15px;
             letter-spacing: 0;
             line-height: 17px;
@@ -37,16 +43,18 @@ Image-to-ASCII generators are certainly not a new idea, but I found all of the o
 Turns out we can generate pretty great-looking plain ascii (no Unicode) art with just a little CSS tweaking and a completely unscientific RGB to character mapping. It works. <br/>
 </div>
 <div class="bigger">
-<a href="https://www.killsignal.net/img2txt/">Try the original higher-res b&w version </a>
+Introducing <a href="https://github.com/scottvr/magicbiff">MAGICBIFF - Multi-color Ascii GraphICs from Binary Image File Formats</a></div>
+<div>
+	<!-- // <a href="https://www.killsignal.net/img2txt/">Try the original higher-res b&w version </a> // -->
 </div>
 <div class="bigger">
 <b>
 Upload any type of image file of any reasonable<b>**</b> size.<br/>
- - The file is "uploaded" only in your browser via javascript; your image is not transferred over the network.<br/>
+ - The file is "uploaded" only within your browser via javascript into the already loaded page context. It does not leave your machine and is not processed by a remote server; all work is done locally on your computer.<br/>
  - zooming with ctrl-+ and pinch/stretch on a trackpad scale the image differently; try both ways.</b><br/>
 <strike> - Sorry, but it doesn't work on mobile devices and I haven't bothered to learn why so I can correct it.</strike> (it's still a little glitchy on mobile, but it does work now.)<br/>
 <b><i> **reasonable is whatever you deem it to be; it's your computer<br>
- &nbsp; note that this color version will reduce the resolution of your image as needed to prevent your browser from crashing.
+ &nbsp; note that tthe process will greatly reduce the resolution of your image as needed to prevent your browser from crashing, yet the results are still quite pleasing and impressive.
 </div>
     </blockquote>
     <br>
