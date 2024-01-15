@@ -7,6 +7,9 @@ Since it runs entirely in the browser, the source (HTML/CSS/JS) is of course ava
 
 So, as promised, I have cleaned the code up at least to the point where it doesn't embarrass me to associate it with my name, and here you shall find it. I have a black&white version and a color version (this is the color version at the moment) that I'll want to consolidate, and I will probably put the documentation page (linked at the top of this README) and its image assets in this repo as well, but here is a first commit.
 
+# Example live web deployment link 
+[magicbiff](https://www.killsignal.net/magicbiff)
+
 # Installation/Configuration
 Short version: clone this repo. Wherever you place the directory, just access the index.html file with a web browser. (The directory URI is probably enough, without the "index.html" filename if being served via a webserver.)
 
