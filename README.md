@@ -5,7 +5,7 @@ I linked my image-to-text web application (which I have now dubbed [MAGICBIFF](h
 
 Since it runs entirely in the browser, the source (HTML/CSS/JS) is of course available as it is sent over https when requested and can be seen as plain text via view-source or the Inspector.   It then occurred to me that even so, perhaps they wanted to be able to be notified of changes, fork, submit PR, etc.. all the stuff that  site like GitHub makes easily available. 
 
-So, as promised, I have cleaned the code up at least to the point where it doesn't embarrass me to associate it with my name, and here you shall find it. I have a black&white version and a color version (this is the color version at the moment) that I'll want to consolidate, and I will probably put the documentation page (linked at the top of this README) and its image assets in this repo as well, but here is a first commit.
+So, as promised, I have cleaned the code up at least to the point where it doesn't embarrass me to associate it with my name, and here you shall find it. I have a black&white version and a color version (this is the color version at the moment) that I'll want to consolidate, because there are some tradeoffs between "resolution" and colorization that some may find interesting. 
 
 # Example live web deployment link 
 [magicbiff](https://www.killsignal.net/magicbiff)
