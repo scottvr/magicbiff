@@ -14,3 +14,6 @@ So, as promised, I have cleaned the code up at least to the point where it doesn
 Short version: clone this repo. Wherever you place the directory, just access the index.html file with a web browser. (The directory URI is probably enough, without the "index.html" filename if being served via a webserver.)
 
 Overly-verbose version: Placing the index.html file in the location of your choosing (e.g., your local filesystem or on a public webserver) given the filename of your choice and opening it in a modern browser that supports CSS, JS, and the Canvas element should be all that is needed to run the app in its current state exactly as the one on [my site](https://www.killsignal.net/magicbiff) works. Of course you are free to rename any of the files and use as-is, or as example (or not-at-all) the [comparisons_and_examples](https://www.killsignal.net/magicbiff/comparisons_and_examples.html) page and images.    
+
+# Additional info
+I have recently uploaded the original b&w version of the tool since I think the vertical line spacing trick has its own value, complementing the current color version. While it is not possible to use both the drop shadow bgcolor trick and the vertical space squishing trick together, a version that uses colored characters and the vertical spacing effect together should be pretty easy. Until then, it is usable on its own.  
