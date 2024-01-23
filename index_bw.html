@@ -5,7 +5,7 @@
   <style>
 body { 
   color: #666; 
-  background-color: #ECECFF;
+  background-color: #FFFFFF;
   font-family: "Andale Mono", "Consolas", "Lucida Console", "Courier", "Courier New", monospace; 
   font-size: 4px; 
   line-height: 2px; 
@@ -37,7 +37,7 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
 </p>
 </div>
 
-<canvas id="canvas" width="640" height="480"></canvas>
+<canvas id="canvas" width="640" height="512"></canvas>
 
 <script>
 var  canvas = document.getElementById('canvas');
@@ -72,10 +72,11 @@ console.log(newWidth);
     }, (60000));
 
 img.addEventListener('load', () =>  {
-          const chars = '@B%8&WM#oahkbdpqwcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.,....    '.split("")
-  
+//          const chars = '@B%8&WM#oahkbdpqwcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.,....    '.split("")
+          const chars = '@B%8&WM#*oahkbdpqwmO0CJUYzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:"^`\'. '.split("");
+
           var count = 0;
-          var str =  "<div class=\"bigger\"><P class=\"bigger\"><a href=\"/img2txt/\">Back</a></p></div><blockquote>";
+	var str =  "<div class=\"bigger\"><P class=\"bigger\"><a href=\"/img2txt/\">Back</a></p></div><blockquote><b>";
           var ar = getarrayfromcanvas(canvas);
           var sum = 0;
           for(var ycnt=0;ycnt<canvas.height;ycnt++){
@@ -83,18 +84,20 @@ img.addEventListener('load', () =>  {
               count++;
 //              console.log(ar[xcnt][ycnt][0] + " " + ar[xcnt][ycnt][1] + " " + ar[xcnt][ycnt][2])
             
-              sum = ar[xcnt][ycnt][0]+ar[xcnt][ycnt][1]+ar[xcnt][ycnt][2];
+              sum = ar[xcnt][ycnt][0]+ar[xcnt][ycnt][1]+ar[xcnt][ycnt][2] + 1;
               //if(sum>32){str+='&nbsp;';}else{str+='/';} 
-              /*console.log("sum: " + sum)
+              /* console.log("sum: " + sum)
               console.log("count: " + count)
               console.log("chars length: " + chars.length)
-*/
-              i = parseInt(((sum/12) % chars.length))
-              ch=chars[i]
+              */
 
-/*               console.log("i: " + i)
+              //i = parseInt(((sum/12) % chars.length)) 
+              i = parseInt(sum/12) 
+              ch=chars[i]
+/*
+              console.log("i: " + i)
               console.log("ch: " + ch)
-*/
+ */
 
               if(ch == ' ') {
                 ch = '&nbsp;';
@@ -102,14 +105,14 @@ img.addEventListener('load', () =>  {
               if(ch == '<') {
                 ch = '&lt;'     
               }
-              if(ch == '<') {
+              if(ch == '>') {
                 ch = '&gt;'     
               }
               str+=ch;
             }
             str+='<br/>';
           }
-          str+='</blockquote>'; 
+	str+='</b></blockquote>'; 
           document.body.innerHTML=str;
           
         });
