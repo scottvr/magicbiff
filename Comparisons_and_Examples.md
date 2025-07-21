@@ -53,7 +53,7 @@ an additional online solution.
 ==============================
 
   
-recently seen: [asciiart.club](https://asciiart.club/). I have added this one because it is presently the top Google result for whatever my search term was and is listed by its title which claims to be an _Online **"HD"** Color Image to Text Converter_ (emphasis on "HD" is mine.) To its credit, it also appears to run entirely in browser like my tool, and to either its credit or detriment is quite a bit more code than mine here, and another potential positive point for this one it has selectable options (which mine does not at the moment) but these options might be a con, since I suspect they are the reason the gallery of user-created images all look, well, not great as with the others mentioned avove. I'm not screenshotting, but there is the link above so you can check it out. Mayb it is actually capable of nice-looking output with the right selection of options for your input image.
+recently seen: [asciiart.club](https://asciiart.club/). I have added this one because it is presently the top Google result for whatever my search term was and is listed by its title which claims to be an _Online **"HD"** Color Image to Text Converter_ (emphasis on "HD" is mine.) To its credit, it also appears to run entirely in browser like my tool, and to either its credit or detriment is quite a bit more code than mine here, and another potential positive point for this one it has selectable options (which mine does not at the moment) but these options might be a con, since I suspect they are the reason the gallery of user-created images all look, well, not great as with the others mentioned above. I'm not screenshotting, but there is the link above so you can check it out. Mayb it is actually capable of nice-looking output with the right selection of options for your input image.
 
   
 
@@ -66,8 +66,6 @@ And now, magicbiff, a better tool
 
 Now that same 1400x700 image as processed by my tool at [killsignal.net](="/img2txt")  
 
-NEW!
-====
 
 ### the new color version of the tool outputs an image very close to the source, even at the much lower resolution, using ascii and html/css to color the letters and the background of each letter. Additionally, I added a drop shadow to the letters of a different shade of the same hue to, well you can see the effect below.
 
