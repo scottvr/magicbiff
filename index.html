@@ -16,9 +16,9 @@
             color: #555;
             background-color: #ececff;
             font-family: "Andale Mono", "Consolas", "Lucida Console", "Courier", "Courier New", monospace;
-            font-size: 5px;
-            line-height: 5px;
-            letter-spacing: 1px;
+            font-size: 8px;
+            white-space: pre;
+            letter-spacing: 0px;
         }
 	.container {
   border: 2px solid #ccc;
@@ -41,10 +41,42 @@
             line-height: 17px;
             white-space: pre;
         }
+/* the visible viewport you want (your “canvas size” in CSS pixels) */
+#frame {
+  width: 1024px;
+  height: 768px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* kill default blockquote/pre margins */
+#ascii { margin: 0; padding: 0; }
+
+/* take the ascii block out of flow */
+#ascii {
+  position: absolute;
+  inset: 0;
+}
+
+#ascii_pre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  white-space: pre;   
+  transform-origin: top left;
+  line-height: 6px;
+  overflow: visible;
+}
     </style>
 </head>
 
+
+
 <body>
+  <div id="ui">
 <div class="pream">
   Image-to-ASCII generators are certainly not a new idea, <a href="./comparisons_and_examples.html">so why another?</a> Basically I found all of the online converter sites
   output some <a href="./comparisons_and_examples.html">pretty ugly results</a> (and in  most cases, processed your image on a remote server) 
@@ -56,32 +88,256 @@
   amazing color results.<BR/>
   Quick and dirty as it is, it definitely works, with results better than I expected to achieve. <br/>
 </div>
-    <blockquote id="ascii">
+    <blockquote>
 <div class="bigger">
-Introducing <a href="https://github.com/scottvr/magicbiff">MAGICBIFF - Multi-color Ascii GraphICs from Binary Image File Formats</a></div>
+Introducing <a href="https://github.com/scottvr/magicbiff">MAGICBIFF - Multi-color Ascii GraphICs from Binary Image File Formats</a>
+</div>
 <div>
 	<!-- // <a href="https://www.killsignal.net/img2txt/">Try the original higher-res b&w version </a> // -->
 </div>
 <div class="bigger">
 <b>
-Upload any type of image file of any reasonable<b>**</b> size.<br/>
- - The file is "uploaded" only within your browser via javascript into the already loaded page context. It does not leave your machine and is not processed by a remote server; all work is done locally on your computer.<br/>
- - zooming with ctrl-+ and pinch/stretch on a trackpad scale the image differently; try both ways.</b><br/>
-<strike> - Sorry, but it doesn't work on mobile devices and I haven't bothered to learn why so I can correct it.</strike> (it's still a little glitchy on mobile, but it does work now.)<br/>
-<b><i> **reasonable is whatever you deem it to be; it's your computer<br>
- &nbsp; note that the process will greatly reduce the resolution of your image as needed to prevent your browser from crashing, yet the results are still quite pleasing and impressive.
+Upload any type of image file of any reasonable<b>**</b> size.
+ - The file is "uploaded" only within your browser via javascript into the already loaded page context. It does not leave your machine and is not processed by a remote server; all work is done locally on your computer.
+ - zooming with ctrl-+ and pinch/stretch on a trackpad scale the image differently; try both ways.</b>
+<b>**reasonable is whatever you deem it to be; it's your computer</b>
+<i> &nbsp; note that the process will greatly reduce the resolution of your image as needed to prevent your browser from crashing, yet the results are still quite pleasing and impressive.</i>
 </div>
-    </blockquote>
     <br>
     <div class="bigger">
         <p>
-            <input type="file" id="fileInput">
+                <input type="file" id="fileInput"> Color: <input type="checkbox"  id="colorToggle" checked>
         </p>
     </div>
+</blockquote>
+</div>
 
-    <canvas id="canvas"></canvas>
+<div id="viewer" style="display:none">
+  <div class="bigger">
+  <a href="#" id="again">Again</a>
+  </div>
+  <div id="frame">
+    <blockquote id="ascii"><pre id="ascii_pre"></pre></blockquote>
+  </div>
+  <div id="ii" class="bigger" style="text-align: center; width: calc(2px * ' + size + ');"><b>zooming with ctrl-+ and pinch/stretch on a trackpad (or screen) scale the image differently; try both ways.</b></span></div>
+</div>
+
+<canvas id="canvas" style="display:none"></canvas>
 
     <script>
+
+function ensureProbePre() {
+  let pre = document.getElementById("ascii_probe_pre");
+  if (pre) return pre;
+  
+  pre = document.createElement("pre");
+  pre.id = "ascii_probe_pre";
+  pre.style.font = "inherit";
+  pre.style.lineHeight = "inherit";
+  pre.style.letterSpacing = "inherit";
+  pre.style.whiteSpace = "pre";
+ 
+  const bq = document.createElement("blockquote");
+  bq.id = "ascii_probe";
+  bq.style.position = "absolute";
+  bq.style.left = "-10000px";
+  bq.style.top = "0";
+  bq.style.visibility = "hidden";
+
+  bq.appendChild(pre);
+
+  document.body.appendChild(bq);
+  return pre;
+}
+
+function measureCell(preEl) {
+  // Measure width of ONE character including letter-spacing by measuring TWO chars
+  // and subtracting (helps reduce subpixel noise).
+  const span = document.createElement("span");
+  span.style.display = "inline-block";
+  span.textContent = "MM";
+  preEl.appendChild(span);
+
+  const w2 = span.getBoundingClientRect().width;
+  span.textContent = "M";
+  const w1 = span.getBoundingClientRect().width;
+
+  const cellW = Math.max(1e-6, w2 - w1); // approx width of one char cell
+  span.remove();
+
+  // Row advance: your body sets line-height: 2px, so computed should be numeric.
+  // But handle "normal" just in case.
+  const cs = getComputedStyle(preEl);
+  let cellH;
+  if (cs.lineHeight !== "normal") {
+    cellH = parseFloat(cs.lineHeight);
+  } else {
+    const two = document.createElement("span");
+    two.style.display = "inline-block";
+    two.textContent = "M\nM";
+    preEl.appendChild(two);
+    cellH = two.getBoundingClientRect().height / 2;
+    two.remove();
+  }
+
+  cellH = Math.max(1e-6, cellH);
+  return { cellW, cellH };
+}
+
+function drawContainIntoGrid(ctx, img, cols, rows) {
+  const Iw = img.naturalWidth || img.width;
+  const Ih = img.naturalHeight || img.height;
+
+  ctx.canvas.width = cols;
+  ctx.canvas.height = rows;
+
+  const s = Math.min(cols / Iw, rows / Ih); // allow up/down scale
+  const Dw = Math.max(1, Math.round(Iw * s));
+  const Dh = Math.max(1, Math.round(Ih * s));
+
+  const offX = Math.floor((cols - Dw) / 2);
+  const offY = Math.floor((rows - Dh) / 2);
+
+  ctx.clearRect(0, 0, cols, rows);
+  ctx.drawImage(img, offX, offY, Dw, Dh);
+
+  return { s, Dw, Dh, offX, offY };
+}
+
+function drawImageLetterboxedForAscii(ctx, img, opts) {
+  opts = opts || {};
+  const allowUpscale = (opts.allowUpscale !== false);  // default true
+  const gridW = Number.isFinite(opts.gridW) ? opts.gridW|0 : (ctx.canvas.width|0);
+  const gridH = Number.isFinite(opts.gridH) ? opts.gridH|0 : (ctx.canvas.height|0);
+  if (ctx.canvas.width !== gridW) ctx.canvas.width = gridW;
+  if (ctx.canvas.height !== gridH) ctx.canvas.height = gridH;;
+ // const gridW = ctx.canvas.width | 0;
+ //  const gridH = ctx.canvas.height | 0;
+
+  const pre = ensureProbePre();
+  let { cellW, cellH } = measureCell(pre);
+
+  // sanity
+  if (!Number.isFinite(cellW) || cellW <= 0) cellW = 1;
+  if (!Number.isFinite(cellH) || cellH <= 0) cellH = 1;
+
+  const imgW = (img.naturalWidth || img.width) | 0;
+  const imgH = (img.naturalHeight || img.height) | 0;
+
+  // effective display-space size of the grid
+  const gridWEff = gridW * cellW;
+  const gridHEff = gridH * cellH;
+
+  // contain (letterbox) scale in display-space
+  let ratio = Math.max(imgW / gridWEff, imgH / gridHEff);
+
+  // if upscaling not allowed, clamp ratio to at least 1
+  if (!allowUpscale) ratio = Math.max(ratio, 1);
+
+  // back to grid units
+  let drawW = (imgW / ratio) / cellW;
+  let drawH = (imgH / ratio) / cellH;
+
+  // round + clamp
+  drawW = Math.max(1, Math.min(gridW, Math.round(drawW)));
+  drawH = Math.max(1, Math.min(gridH, Math.round(drawH)));
+
+  const offX = Math.floor((gridW - drawW) / 2);
+  const offY = Math.floor((gridH - drawH) / 2);
+
+  ctx.clearRect(0, 0, gridW, gridH);
+  ctx.drawImage(img, offX, offY, drawW, drawH);
+
+  console.log({gridW, gridH, cellW, cellH, imgW, imgH, ratio, drawW, drawH, offX, offY});
+}
+function scaleAsciiToFrame() {
+  const pre = document.getElementById("ascii_pre");
+  const frame = document.getElementById("frame");
+
+  // Reset scale so we measure natural size
+  pre.style.transform = "scale(1)";
+
+  // Force layout flush so rects are correct
+  const preRect = pre.getBoundingClientRect();
+  const frameRect = frame.getBoundingClientRect();
+
+  // Avoid divide-by-zero
+  if (preRect.width <= 0 || preRect.height <= 0) return;
+
+  const sx = frameRect.width / preRect.width;
+  const sy = frameRect.height / preRect.height;
+
+  // Preserve aspect; letterbox behavior
+  const s = Math.min(sx, sy);
+  // fill/crop
+  //const s = Math.max(sx, sy);
+
+  pre.style.transform = "scale(" + s + ")";
+}
+
+function showViewer() {
+  document.getElementById("ui").style.display = "none";
+  document.getElementById("viewer").style.display = "block";
+}
+
+function showUi() {
+  document.getElementById("viewer").style.display = "none";
+  document.getElementById("ui").style.display = "block";
+  // optional: clear previous output
+  document.getElementById("ascii_pre").textContent = "";
+  document.getElementById("fileInput").value = "";
+}
+
+document.getElementById("again").addEventListener("click", (e) => {
+  e.preventDefault();
+  showUi();
+});
+
+function gridFromFrame(frameEl) {
+  const pre = ensureProbePre();
+  const { cellW, cellH } = measureCell(pre);
+
+  const rect = frameEl.getBoundingClientRect();
+  const Fw = rect.width;
+  const Fh = rect.height;
+
+  // At least 1x1
+  const cols = Math.max(1, Math.floor(Fw / cellW));
+  const rows = Math.max(1, Math.floor(Fh / cellH));
+
+  return { cols, rows, cellW, cellH, frameW: Fw, frameH: Fh };
+}
+
+function autoGridAndDraw(ctx, img, cols) {
+  const pre = ensureProbePre();
+  const { cellW, cellH } = measureCell(pre);
+
+  const Iw = img.naturalWidth || img.width;
+  const Ih = img.naturalHeight || img.height;
+
+  // choose rows so the displayed ASCII aspect matches the image aspect
+  const rows = Math.max(1, Math.round(cols * (Ih / Iw) * (cellW / cellH)));
+
+  ctx.canvas.width = cols;
+  ctx.canvas.height = rows;
+
+  // optimal no-crop contain in GRID units
+  const Fw = cols;
+  const Fh = rows;
+
+  const s = Math.min(Fw / Iw, Fh / Ih); // allow up/down scale
+  const Dw = Math.max(1, Math.round(Iw * s));
+  const Dh = Math.max(1, Math.round(Ih * s));
+
+  const offX = Math.floor((Fw - Dw) / 2);
+  const offY = Math.floor((Fh - Dh) / 2);
+
+  ctx.clearRect(0, 0, Fw, Fh);
+  ctx.drawImage(img, offX, offY, Dw, Dh);
+
+  return { cols, rows, cellW, cellH, s, Dw, Dh, offX, offY };
+}
+
       var canvas = document.getElementById('canvas');
       var ctx = canvas.getContext('2d', { preserveDrawingBuffer: true });
 
@@ -93,24 +349,24 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
         const size = 300;
         const scale = window.devicePixelRatio;
         reader.addEventListener('load', (e) => {
-          var img = new Image();
-          var rszimg = new Image();
-          rszimg.addEventListener('load', () => { img.src = resize(size, size); });
-          rszimg.src = reader.result;
-          console.log(rszimg.width, rszimg.height);
+          const img = new Image();
           img.addEventListener('load', (e) => {
-            ctx.drawImage(img, 0, 0, 300, 200 / img.width * 200);
-            var imgWidth = img.width;
-            var imgHeight = img.height;
-            var newWidth, newHeight, offsetX, offsetY;
-            var scaleRat = Math.min(imgWidth, imgHeight)/Math.max(imgWidth,imgHeight);
-            newWidth = imgWidth > imgHeight ? size : imgWidth*scaleRat;
-            newHeight = imgHeight > imgWidth ? size : imgHeight*scaleRat;
-            //const chars = '@B%8&WM#oahkbdpqwcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.,....    '.split("")
-            const chars = '@B%8&WM#*oahkbdpqwmO0CJUYzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'.'.split("");
+            showViewer();
+            const frame = document.getElementById("frame");
+            const { cols, rows } = gridFromFrame(frame);
+
+            drawContainIntoGrid(ctx, img, cols, rows);
+
+            //drawImageLetterboxedForAscii(ctx, img, { gridW: 300, gridH: 300 });
+            ////drawImageLetterboxedForAscii(ctx, img);
+            //drawImageContain(ctx, img, { allowUpscale: false, compensateCells: false });
+            //const chars = ' `.-\':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@'.split("");
+            //const chars = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,"^`\'. '.split("");
+            const chars = '@B%8&WM#*oahkbdpqwmO0CJUYzcvunxrjft/\\|()1{}[]?-+~<>i!lI;:,_"^`\'. '.split("");
             var count = 0;
-            var str =  "<blockquote id='ascii'><pre><div class=\"bigger\"><p><a href=\"" + location.href + "\">Again</a></p></div>";
-            var ar = getarrayfromcanvas(canvas);
+            //var str =  "<blockquote id='ascii'><pre><div class=\"bigger\"><p><a href=\"" + location.href + "\">Again</a></p></div>";
+            var str = "";
+            const ar = getarrayfromcanvas(canvas);
             var sum = 0;
             var R, G, B, color;
             function tohex(num) {
@@ -119,28 +375,10 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
             };
             for(var ycnt=0;ycnt<canvas.height;ycnt++) {
               for(var xcnt=0;xcnt<canvas.width;xcnt++) {
-                count++;
-      
-                R = ar[xcnt][ycnt][0];
-                G = ar[xcnt][ycnt][1];
-                B = ar[xcnt][ycnt][2];
-                color = "#" + tohex(R) + tohex(G) +tohex(B); 
-      
-      
-                R = Math.max(ar[xcnt][ycnt][0] >> 1, 0);
-                G = Math.max(ar[xcnt][ycnt][1] >> 1, 0);
-                B = Math.max(ar[xcnt][ycnt][2] >> 1, 0);
-                shadow = "#" + tohex(R) + tohex(G) +tohex(B); 
-      
-                //console.log(R.toString());
-                R = Math.max(R <= 215 ? R + 40 : 255, 0);
-                G = Math.max(G <= 215 ? G + 40 : 255, 0);
-                B = Math.max(B <= 215 ? B + 40 : 255, 0);
-                bgcolor = "#" + tohex(R) + tohex(G) +tohex(B); 
-      
-                //console.log(R.toString());
                 sum = ar[xcnt][ycnt][0]+ar[xcnt][ycnt][1]+ar[xcnt][ycnt][2];
                 i = parseInt(((sum/12) % chars.length))
+                //i = parseInt(((sum/12)))
+                //i = Math.floor(sum/3/255 * (chars.length-1))
                 ch=chars[i]
         
                 if(ch == ' ') {
@@ -149,15 +387,36 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
                 if(ch == '<') {
                   ch = '&lt;'     
                 }
-                if(ch == '<') {
+                if(ch == '>') {
                   ch = '&gt;'     
                 }
-                str+='<span style="color: ' + color + '; background-color: ' + bgcolor + '; text-shadow: 1px 1px ' + shadow + ';">' + ch + "</span>";
+                if(document.getElementById('colorToggle').checked) {
+                  R = ar[xcnt][ycnt][0];
+                  G = ar[xcnt][ycnt][1];
+                  B = ar[xcnt][ycnt][2];
+                  color = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+                  R = Math.max(ar[xcnt][ycnt][0] >> 1, 0);
+                  G = Math.max(ar[xcnt][ycnt][1] >> 1, 0);
+                  B = Math.max(ar[xcnt][ycnt][2] >> 1, 0);
+                  shadow = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+                  R = Math.max(R <= 215 ? R + 40 : 255, 0);
+                  G = Math.max(G <= 215 ? G + 40 : 255, 0);
+                  B = Math.max(B <= 215 ? B + 40 : 255, 0);
+                  bgcolor = "#" + tohex(R) + tohex(G) +tohex(B); 
+      
+                  str+='<span style="color: ' + color + '; background-color: ' + bgcolor + '; text-shadow: 1px 1px ' + shadow + ';">' + ch + "</span>";
+                } else {
+                  str+=ch;
+                }
               }
               str+="\n";
             }
-            str+='<br/><div id="ii" class="bigger" style="text-align: center; width: calc(2px * ' + size + ');"><b>zooming with ctrl-+ and pinch/stretch on a trackpad (or screen) scale the image differently; try both ways.</b></span></div><br/></pre></blockquote> <script src="javascript:snap();" ></sc' + 'ript>';
-            document.body.innerHTML=str + "</body>";
+
+          const pre = document.getElementById("ascii_pre");
+          pre.innerHTML = str;   // or textContent for b&w
+          scaleAsciiToFrame();
           });
                 
           function getarrayfromcanvas(canvas) {
@@ -178,32 +437,13 @@ Upload any type of image file of any reasonable<b>**</b> size.<br/>
           return arr;
         }
 
-        function resize(maxwhw, maxwhh) {
-          let maxw = maxwhw;
-          let maxh = maxwhh;
-          let w = maxw;
-          let h = maxh;
-          let needs_reeize = false;
-          console.log(w,h,maxw,maxh);
-          if(w >= h && w >= maxw) {
-            h *= maxw/w;
-            w = maxw;
-          } else if(h > maxh) {
-              w = maxh/h;
-              h = maxh;
-          } 
-          let rszcan = document.createElement('canvas');
-          rszcan.width = w
-          rszcan.height = h;
-      
-          let rszctx = rszcan.getContext('2d');
-          console.log(rszimg, 0, 0, w, h);
-          rszctx.drawImage(rszimg, 0, 0, w, h);
-          return rszcan.toDataURL('image/png');
-        }  
+
+      img.src = reader.result;
       });
       reader.readAsDataURL(file);
     });
+    console.log("canvas", canvas.width, canvas.height);
+    console.log("computed line-height", getComputedStyle(document.getElementById("ascii_pre")).lineHeight);
     </script>
 </body>
               
